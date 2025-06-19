@@ -1,0 +1,6 @@
+{
+  "pomodoroDuration": 1,
+  "shortBreakDuration": 5,
+  "longBreakDuration": 15,
+  "soundOnFinish": true
+}

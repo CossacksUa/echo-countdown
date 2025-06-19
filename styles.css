@@ -1,0 +1,236 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap');
+
+/* ... решта вашого CSS ... */
+/* Custom properties for Division-like colors and effects */
+:root {
+    --division-accent-color: #ff9800; /* Насичений оранжевий акцент */
+    --division-accent-hover: #ffa726;
+    --division-text-color: #e0e0e0; /* Світліший текст */
+    --division-background-dark: #1a1a1a; /* Темний фон */
+    --division-background-medium: #2a2a2a; /* Середній фон, використовується для фону кола */
+    --division-glow-strength: 0 0 8px var(--division-accent-color), 0 0 15px var(--division-accent-color);
+    --division-button-glow: 0 0 5px var(--division-accent-color);
+
+    /* Кольори для режимів таймера */
+    --division-pomodoro-color: #ff9800; /* Оранжевий для фокусу */
+    --division-short-break-color: #aeea00; /* Жовтувато-зелений для короткої перерви */
+    --division-long-break-color: #00bfa5; /* Бірюзовий для довгої перерви */
+
+    /* Дефолтні кольори Obsidian, якщо вони використовуються напряму в main.ts */
+    --color-red: #e06c75;
+    --color-green: #98c379;
+    --color-blue: #61afef;
+    --color-base-50: var(--division-text-color); /* Default for stopped */
+}
+
+/* Якщо ви хочете використовувати кастомний цифровий шрифт (наприклад, Segment7),
+   розмістіть файл шрифту (наприклад, Segment7.woff2) у папці 'fonts'
+   всередині вашої папки плагіна:
+   .obsidian/plugins/pomodoro-timer/fonts/Segment7.woff2
+   Потім РОЗКОМЕНТУЙТЕ (@font-face) блок нижче та font-family у .pomodoro-timer-display
+*/
+/*
+@font-face {
+    font-family: 'Segment7';
+    src: url('fonts/Segment7.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+*/
+
+/* Base container for the Pomodoro View - Main panel wrapper */
+.pomodoro-view-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5em 1em;
+    background-color: var(--division-background-dark); /* Темний фон всієї панелі */
+    color: var(--division-text-color);
+    font-family: 'Segoe UI', 'Roboto Mono', monospace, sans-serif; /* Основний шрифт панелі */
+    height: 100%; /* Займаємо всю доступну висоту */
+    width: 100%;
+    box-sizing: border-box; /* Включаємо padding та border у розмір */
+    overflow: hidden; /* Ховаємо надлишковий вміст */
+    position: relative; /* Для ефектів фону */
+}
+
+/* Optional: Subtle background texture/grid for futuristic feel */
+/* Розкоментуйте, якщо потрібен ефект сітки на фоні панелі */
+/*
+.pomodoro-view-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: linear-gradient(0deg, transparent 95%, rgba(255, 255, 255, 0.05) 100%),
+                      linear-gradient(90deg, transparent 95%, rgba(255, 255, 255, 0.05) 100%);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
+}
+*/
+
+/* Main title for the Pomodoro View */
+.pomodoro-view-title {
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-bottom: 1em;
+    color: var(--division-text-color);
+    text-align: center;
+}
+
+/* Display for current mode (Focus, Short Break, etc.) - The Division Style */
+/* Display for current mode (Focus, Short Break, etc.) - The Division Style */
+.pomodoro-mode-display {
+    /* Виберіть один з варіантів font-family, як ми обговорювали раніше */
+    font-family: 'SF Mono', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+    /* font-family: 'Oswald', sans-serif; */ /* Якщо використовуєте Google Font */
+
+    font-size: 1.6em; /* Можна збільшити або зменшити за бажанням */
+    font-weight: 700;
+    color: var(--division-accent-color); /* Змінено: тепер завжди оранжевий акцентний колір */
+    margin-bottom: 1em;
+    text-align: center;
+    width: 100%;
+    padding-top: 0.5em;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+
+    text-shadow: none;
+    filter: none;
+}
+
+
+/* Container for the SVG timer and time display */
+.pomodoro-timer-container {
+    position: relative;
+    width: 200px; /* Зменшено, наприклад, до 200px */
+    height: 200px; /* Зменшено, наприклад, до 200px */
+    min-width: 150px;
+    min-height: 150px;
+    max-width: 250px; /* Зменшено, щоб не дозволяти йому ставати надто великим */
+    max-height: 250px; /* Зменшено, щоб не дозволяти йому ставати надто великим */
+    margin-bottom: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background-color: var(--division-background-medium);
+    border-radius: 50%;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* SVG for the progress bar */
+.pomodoro-progress-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Ця трансформація повертає коло так, щоб 0 градусів був нагорі
+       і анімація йшла за годинниковою стрілкою від верхньої точки
+    */
+    transform: rotateY(-180deg) rotateZ(-90deg);
+    overflow: visible; /* Дозволяє drop-shadow виходити за межі SVG */
+    transition: filter 0.3s ease-out; /* Перехід для світіння */
+}
+
+/* Foreground circle (animated progress bar) */
+.pomodoro-progress-fg {
+    fill: none;
+    stroke-width: 10px; /* Збільшена товщина лінії, як обговорювали */
+    stroke-linecap: round; /* Закруглені кінці лінії */
+    /* КРИТИЧНО для плавної анімації stroke-dashoffset */
+    transition: stroke-dashoffset 1s linear;
+}
+
+/* Background circle of the progress bar */
+.pomodoro-progress-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1); /* Дуже світлий, ледь помітний сірий, як у вашому прикладі */
+    stroke-width: 10px; /* Збільшена товщина фонової лінії, як обговорювали */
+}
+
+/* Time display */
+.pomodoro-timer-display {
+    position: relative; /* Змінено на relative, якщо це допомагає з позиціонуванням */
+    font-size: 4em; /* Більший розмір шрифту, як обговорювали */
+    font-weight: 200; /* Тонший шрифт, як у вашому прикладі */
+    color: var(--division-text-color);
+    letter-spacing: 0.05em; /* Розширимо літери */
+    /* text-shadow: var(--division-glow-strength); */ /* Розкоментуйте, якщо хочете світіння на цифрах */
+    line-height: 1; /* Щоб не було зайвого вертикального відступу */
+    z-index: 1;
+    transition: color 0.5s ease-in-out, text-shadow 0.5s ease-in-out;
+
+    /* Якщо ви імпортували кастомний шрифт, розкоментуйте і використовуйте його тут */
+    /* font-family: 'Segment7', monospace; */
+    font-variant-numeric: tabular-nums; /* Щоб цифри мали фіксовану ширину */
+}
+
+/* Buttons container */
+.pomodoro-controls { /* Змінено назву на pomodoro-controls, як у main.ts */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8em; /* Збільшимо відступ між кнопками */
+    margin-top: 1em;
+    justify-content: center;
+    width: 100%;
+    max-width: 300px; /* Збільшимо максимальну ширину контейнера кнопок */
+}
+
+.pomodoro-button { /* Змінено назву на pomodoro-button, як у main.ts */
+    flex-grow: 1;
+    min-width: 90px; /* Збільшимо мінімальну ширину */
+    padding: 0.8em 1.2em; /* Збільшимо відступи */
+    font-size: 1em;
+    border-radius: 8px; /* Більш округлі кути */
+    cursor: pointer;
+    background-color: var(--division-background-medium);
+    color: var(--division-text-color);
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Тонка світла рамка */
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden; /* Для ефектів hover */
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Тінь для тексту кнопки */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Hover effect for buttons */
+.pomodoro-button:hover:not(:disabled) {
+    background-color: var(--division-background-medium); /* Зберігаємо темний фон */
+    color: var(--division-accent-color); /* Акцентний колір при наведенні */
+    border-color: var(--division-accent-color);
+    box-shadow: var(--division-button-glow); /* Неонове світіння при наведенні */
+}
+
+/* Specific style for the Start button (mod-cta) */
+.pomodoro-button.mod-cta {
+    background-color: var(--division-accent-color);
+    color: var(--division-background-dark); /* Темний текст на світлому акценті */
+    border-color: var(--division-accent-color);
+    font-weight: bold;
+    text-shadow: none; /* Видалимо тінь для кращої читабельності */
+    box-shadow: var(--division-glow-strength); /* Сильніше світіння для CTA */
+}
+
+.pomodoro-button.mod-cta:hover:not(:disabled) {
+    background-color: var(--division-accent-hover);
+    border-color: var(--division-accent-hover);
+    box-shadow: var(--division-glow-strength);
+}
+
+/* Disabled button state */
+.pomodoro-button:disabled {
+    opacity: 0.4; /* Менша прозорість */
+    cursor: not-allowed;
+    background-color: var(--division-background-dark); /* Темніший фон для вимкнених */
+    color: var(--text-muted);
+    border-color: rgba(255, 255, 255, 0.05);
+    box-shadow: none;
+    text-shadow: none;
+}

@@ -1,0 +1,13 @@
+{
+  "name": "echo_countdown", // Це внутрішня назва, зазвичай snake-case
+  "version": "1.0.0",
+  "description": "A Pomodoro timer plugin for Obsidian.",
+  "main": "main.js",
+  "scripts": { /* ... */ },
+  "keywords": [],
+  "author": "T.Oleksandr",
+  "license": "MIT",
+  "devDependencies": { /* ... */ },
+  // Це поле часто використовується для відображуваної назви в маркетплейсі Obsidian
+  "displayName": "Echo Countdown Timer"
+}

@@ -1,0 +1,11 @@
+{
+	"id": "echo-countdown",
+	"name": "Echo Countdown",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "My first plugin timer, analog Pomodoro",
+	"author": "T.Oleksandr",
+	"authorUrl": "https://github.com/CossacksUa",
+	"fundingUrl": "https://github.com/CossacksUa",
+	"isDesktopOnly": false
+}
